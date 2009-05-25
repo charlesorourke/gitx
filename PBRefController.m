@@ -193,14 +193,22 @@
 		return;
 
 	PBGitCommit *commit = [[commitController selectedObjects] objectAtIndex:0];
-	int retValue = 1;
 
+	int retValue = 1;
 	[historyController.repository outputForArguments:[NSArray arrayWithObjects:@"check-ref-format", branchName, nil] retValue:&retValue];
 	if (retValue != 0) {
 		[errorMessage setStringValue:@"Invalid name"];
 		return;
 	}
 
+	retValue = 1;
+	[historyController.repository outputForArguments:[NSArray arrayWithObjects:@"show-ref", @"--quiet", @"--verify", branchName, nil] retValue:&retValue];
+	if (retValue == 0) {
+		[errorMessage setStringValue:@"Branch exists"];
+		return;
+	}
+
+	retValue = 1;
 	[historyController.repository outputForArguments:[NSArray arrayWithObjects:@"update-ref", @"-mCreate branch from GitX", branchName, [commit realSha], NULL] retValue:&retValue];
 	if (retValue)
 	{
